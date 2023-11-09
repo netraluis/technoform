@@ -28,6 +28,7 @@ export default function Home() {
     gb: 0,
     verticalesVidrio: 0,
     horizontalesVidrio: 0,
+    materialVidrio: "aluminio"
   });
 
   const [internValues, setInternValues] = useState({
@@ -92,6 +93,7 @@ export default function Home() {
 
   useEffect(()=> {
     if(userChangeableData.material && userChangeableData.acristalamiento === 'doble' && userChangeableData.dgb && userChangeableData.tipo){
+      console.log(userChangeableData.material,userChangeableData.acristalamiento,userChangeableData.dgb,userChangeableData.tipo)
       setUserChangeableData({
         ...userChangeableData,
         gb: PsiVidirio[userChangeableData.material][userChangeableData.acristalamiento][userChangeableData.dgb][userChangeableData.tipo],
@@ -111,10 +113,10 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
   }, [userChangeableData.material, userChangeableData.acristalamiento, userChangeableData.dgb, userChangeableData.tipo])
 
   useEffect(()=>{
-    if(PsiEspaciador[userChangeableData.material] && PsiEspaciador[userChangeableData.material][userChangeableData.tipo]){
+    if(PsiEspaciador[userChangeableData.materialVidrio] && PsiEspaciador[userChangeableData.materialVidrio][userChangeableData.tipo]){
       setUserChangeableData({
         ...userChangeableData,
-        wg: Number(PsiEspaciador[userChangeableData.material][userChangeableData.tipo]),
+        wg: Number(PsiEspaciador[userChangeableData.materialVidrio][userChangeableData.tipo]),
       });
     }else{
       setUserChangeableData({
@@ -122,7 +124,7 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
         wg: 0
       });
     }
-  }, [userChangeableData.tipo, userChangeableData.material])
+  }, [userChangeableData.tipo, userChangeableData.materialVidrio])
 
   const secondSelection = (index: number) => {
     setSecondSelected(index);
@@ -448,7 +450,7 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
                         // if(PsiEspaciador[e.target.value] && PsiEspaciador[e.target.value][userChangeableData.tipo]){
                           setUserChangeableData({
                             ...userChangeableData,
-                            material: e.target.value,
+                            materialVidrio: e.target.value,
                             // wg: Number(PsiEspaciador[e.target.value][userChangeableData.tipo]),
                           });
                         // }
