@@ -1,5 +1,5 @@
 export const user = {
-  username: "adrian",
+  username: "david",
   password: "1234",
 };
 
@@ -31,8 +31,8 @@ export const PsiEspaciador: any = {
     sinRevestir: 0.06,
     bajoEmisivo: 0.08,
   },
-  SP14: { simple: 0, sinRevestir: 0.049, bajoEmisivo: 0.044 },
-  SP16: { simple: 0, sinRevestir: 0.036, bajoEmisivo: 0.031 },
+  SP14: { simple: 0, doble: 0.049, triple: 0.044 },
+  SP16: { simple: 0, doble: 0.036, triple: 0.031 },
 };
 
 export const PsiVidirio: any = {

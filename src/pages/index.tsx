@@ -3,9 +3,29 @@ import Container from "react-bootstrap/Container";
 import Header from "@/components/Header";
 import { PsiEspaciador, PsiVidirio, data, user } from "@/rawData/testData";
 import { useEffect, useState } from "react";
+import { Margin, usePDF } from "react-to-pdf";
+
+interface UserChangeableData {
+  alto: number,
+  ancho: number,
+  acristalamiento: string,
+  tipo: string,
+  wg: number,
+  incluyeBarrotillos: string,
+  material: string,
+  dgb: string,
+  gb: number,
+  verticalesVidrio: number,
+  horizontalesVidrio: number,
+  materialVidrio: string
+}
 
 export default function Home() {
-  const [calcVisible, setCalcVisible] = useState(true)
+  const { toPDF, targetRef } = usePDF({
+    filename: "technoform_calculos.pdf",
+    page: { margin: Margin.MEDIUM }
+  });
+  const [calcVisible, setCalcVisible] = useState(false)
   const [progress, setProgress] = useState(0);
   const [login, setLogin] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState(false);
@@ -17,8 +37,8 @@ export default function Home() {
     bf: 0,
   });
   const [userChangeableData, setUserChangeableData] = useState({
-    alto: 0,
-    ancho: 0,
+    alto: 1,
+    ancho: 1,
     acristalamiento: "simple",
     tipo: "sinRevestir",
     wg: 0,
@@ -82,7 +102,7 @@ export default function Home() {
       altoVidrio,
       anchoVidrio
     });
-  }, [userChangeableData.alto, userChangeableData.ancho]);
+  }, [userChangeableData]);
 
   useEffect(() => {
     const uWS = internValues.agUg + internValues.afUf + internValues.psiL + internValues.lgbWg;
@@ -91,40 +111,43 @@ export default function Home() {
     setUw(uW)
   }, [internValues])
 
-  useEffect(()=> {
-    if(userChangeableData.material && userChangeableData.acristalamiento === 'doble' && userChangeableData.dgb && userChangeableData.tipo){
-      console.log(userChangeableData.material,userChangeableData.acristalamiento,userChangeableData.dgb,userChangeableData.tipo)
-      setUserChangeableData({
-        ...userChangeableData,
-        gb: PsiVidirio[userChangeableData.material][userChangeableData.acristalamiento][userChangeableData.dgb][userChangeableData.tipo],
-      });
-    }else if(userChangeableData.material && userChangeableData.acristalamiento === 'triple' && userChangeableData.dgb && userChangeableData.tipo && (userChangeableData.incluyeBarrotillos === 'vidrio1' || userChangeableData.incluyeBarrotillos === 'vidrio2')){
-console.log(userChangeableData.material, userChangeableData.acristalamiento, userChangeableData.dgb, userChangeableData.tipo, userChangeableData.incluyeBarrotillos)
-      setUserChangeableData({
-        ...userChangeableData,
-        gb: PsiVidirio[userChangeableData.material][userChangeableData.acristalamiento][userChangeableData.incluyeBarrotillos][userChangeableData.dgb][userChangeableData.tipo]
-      });
-    }else{
-      setUserChangeableData({
-        ...userChangeableData,
-        gb: 0
-      });
-    }
-  }, [userChangeableData.material, userChangeableData.acristalamiento, userChangeableData.dgb, userChangeableData.tipo])
+  const getPsiVidiro = (userChangeableData: UserChangeableData) => {
 
-  useEffect(()=>{
-    if(PsiEspaciador[userChangeableData.materialVidrio] && PsiEspaciador[userChangeableData.materialVidrio][userChangeableData.tipo]){
-      setUserChangeableData({
-        ...userChangeableData,
-        wg: Number(PsiEspaciador[userChangeableData.materialVidrio][userChangeableData.tipo]),
-      });
+    let newUserChangeableData = {...userChangeableData}
+
+    // getPsiVidiro
+    if(userChangeableData.material && userChangeableData.acristalamiento === 'doble' && userChangeableData.dgb && userChangeableData.tipo){
+      newUserChangeableData = {...newUserChangeableData, gb: PsiVidirio[userChangeableData.material][userChangeableData.acristalamiento][userChangeableData.dgb][userChangeableData.tipo]} 
+    }else if(userChangeableData.material && userChangeableData.acristalamiento === 'triple' && userChangeableData.dgb && userChangeableData.tipo && (userChangeableData.incluyeBarrotillos === 'vidrio1' || userChangeableData.incluyeBarrotillos === 'vidrio2')){
+      newUserChangeableData = {...newUserChangeableData, gb: PsiVidirio[userChangeableData.material][userChangeableData.acristalamiento][userChangeableData.incluyeBarrotillos][userChangeableData.dgb][userChangeableData.tipo]}
     }else{
-      setUserChangeableData({
-        ...userChangeableData,
-        wg: 0
-      });
+      newUserChangeableData = {...newUserChangeableData, gb: 0}
     }
-  }, [userChangeableData.tipo, userChangeableData.materialVidrio])
+
+    if(userChangeableData.materialVidrio && userChangeableData.tipo && userChangeableData.acristalamiento){
+      const wgDependiente = userChangeableData.materialVidrio === 'SP14' || userChangeableData.materialVidrio === 'SP16' ? userChangeableData.acristalamiento : userChangeableData.tipo 
+      newUserChangeableData = {...newUserChangeableData,  wg: Number(PsiEspaciador[userChangeableData.materialVidrio][wgDependiente])}
+    }else{
+      newUserChangeableData = {...newUserChangeableData,  wg: 0, incluyeBarrotillos: 'no'}
+    }
+
+    setUserChangeableData(newUserChangeableData);
+  }
+
+
+  useEffect(()=> {
+      getPsiVidiro(userChangeableData)
+  }, [userChangeableData.material])
+  useEffect(()=> {
+    getPsiVidiro(userChangeableData)
+  }, [userChangeableData.acristalamiento])
+  useEffect(()=> {
+    getPsiVidiro(userChangeableData)
+  }, [userChangeableData.dgb])
+  useEffect(()=> {
+    getPsiVidiro(userChangeableData)
+  }, [userChangeableData.tipo])
+
 
   const secondSelection = (index: number) => {
     setSecondSelected(index);
@@ -297,7 +320,7 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
         )}
 
         {progress === 3 && (
-          <div className="container text-center mt-3">
+          <div className="container text-center mt-3" ref={targetRef}>
             <div className="row justify-content-md-center">
               {/* {data[firstSelected].blueprints.map((item, index) => ( */}
               <div className="row">
@@ -328,7 +351,6 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
                     <input
                       type="number"
                       step="any"
-                      // type="string"
                       className="form-control"
                       id="alto"
                       placeholder="10"
@@ -349,24 +371,60 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
                 </div>
 
                 <div className="col-3">
-                  <legend>Vidrio</legend>
-                  <label htmlFor="acristalamiento">Acristalamiento</label>
-                  <select
-                    onChange={(e) =>
-                      setUserChangeableData({
-                        ...userChangeableData,
-                        acristalamiento: e.target.value,
-                      })
-                    }
-                    className="form-select mb-3"
-                    aria-label="Acristalamiento"
-                  >
-                    <option selected value="simple">Simple</option>
-                    <option value="doble">Doble</option>
-                    <option value="triple">Triple</option>
-                  </select>
+                  <legend>Sección</legend>
+                  <div className="mb-3 form-floating">
+                    <input
+                      type="number"
+                      step="any"
+                      className="form-control"
+                      id="uf"
+                      placeholder="10"
+                      value={
+                        importSelectedData.uf ? importSelectedData.uf : ""
+                      }
+                    />
+                    <label htmlFor="uf" className="form-label">
+                      Uf(m)
+                    </label>
+                  </div>
+                  <div className="mb-3 form-floating">
+                    <input
+                      type="number"
+                      step="any"
+                      className="form-control"
+                      id="alto"
+                      placeholder="10"
+                      value={
+                        importSelectedData.bf ? importSelectedData.bf : ""
+                      }
+                    />
+                    <label htmlFor="alto" className="form-label">
+                      Bf
+                    </label>
+                  </div>
+                </div>
 
-                  <label htmlFor="tipo">Tipo</label>
+                <div className="col-3">
+                  <legend>Vidrio</legend>
+                  {/* <div > */}
+                    <label htmlFor="Acristalamiento" className="form-label">Acristalamiento</label>
+                    <select
+                      onChange={(e) =>
+                        setUserChangeableData({
+                          ...userChangeableData,
+                          acristalamiento: e.target.value,
+                        })
+                      }
+                      className="form-select mb-3"
+                      aria-label="Acristalamiento"
+                      // size={3}
+                    >
+                      <option selected value="simple">Simple</option>
+                      <option value="doble">Doble</option>
+                      <option value="triple">Triple</option>
+                    </select>
+
+                  <label htmlFor="tipo" className="form-label">Tipo</label>
                   <select
                     className="form-select mb-3"
                     aria-label="Tipo"
@@ -396,72 +454,61 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
                 </div>
 
                 {userChangeableData.acristalamiento === "simple" && (
-                  <div className="col-3">
-                    <legend>Espaciador de vidrio simples</legend>
-                    <label htmlFor="tipo">Tipo</label>
-                    <select
-                      className="form-select mb-3"
-                      aria-label="Espaciador de vidrio"
-                      defaultValue={"-"}
-                      disabled={true}
-                    >
-                      <option selected value="-">-</option>
-                    </select>
-
-                    <div className="mb-3 form-floating">
-                      <input
-                        type="number"
-                        className="form-control"
-                        id="Wg"
-                        placeholder="10"
-                        value={0}
+                  <>
+                    <div className="col-3">
+                      <legend>Espaciador de vidrio</legend>
+                      <label htmlFor="tipo" className="form-label">Tipo</label>
+                      <select
+                        className="form-select mb-3"
+                        aria-label="Espaciador de vidrio"
+                        defaultValue={"-"}
                         disabled={true}
-                      />
-                      <label htmlFor="Wg" className="form-label">
-                        Ψg(W/mK)
-                      </label>
+                      >
+                        <option selected value="-">-</option>
+                      </select>
+
+                      <div className="mb-3 form-floating">
+                        <input
+                          type="number"
+                          className="form-control"
+                          id="Wg"
+                          placeholder="10"
+                          value={0}
+                          disabled={true}
+                        />
+                        <label htmlFor="Wg" className="form-label">
+                          Ψg(W/mK)
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                )}
-                {userChangeableData.acristalamiento === "simple" && (
-                  <div className="col-3">
-                    <legend>Barrotillos del vidrio simples</legend>
-                    <label htmlFor="incluye">¿incluye?</label>
-                    <select
-                      className="form-select mb-3"
-                      aria-label="Espaciador de vidrio"
-                      disabled={true}
-                      defaultValue={"no"}
-                    >
-                      <option selected value="no">No</option>
-                    </select>
-                  </div>
+                    <div className="col-3">
+                      <legend>Barrotillos del vidrio</legend>
+                      <label htmlFor="incluye" className="form-label">¿incluye?</label>
+                      <select
+                        className="form-select mb-3"
+                        aria-label="Espaciador de vidrio"
+                        disabled={true}
+                        defaultValue={"no"}
+                      >
+                        <option selected value="no">No</option>
+                      </select>
+                    </div>
+                  </>
                 )}
 
                 {(userChangeableData.acristalamiento === "doble" ||
                   userChangeableData.acristalamiento === "triple") && (
                   <div className="col-3">
-                    <legend>Espaciador de vidrio doble o triple</legend>
-                    <label htmlFor="tipo">Tipo</label>
+                    <legend>Espaciador de vidrio</legend>
+                    <label htmlFor="tipo" className="form-label">Tipo</label>
                     <select
                       className="form-select mb-3"
                       aria-label="Espaciador de vidrio"
                       onChange={(e) => {
-                        // if(PsiEspaciador[e.target.value] && PsiEspaciador[e.target.value][userChangeableData.tipo]){
                           setUserChangeableData({
                             ...userChangeableData,
                             materialVidrio: e.target.value,
-                            // wg: Number(PsiEspaciador[e.target.value][userChangeableData.tipo]),
                           });
-                        // }
-                        
-                    // if(PsiEspaciador[e.target.value]){
-                    //   setUserChangeableData({
-                    //     ...userChangeableData,
-                    //     wg: Number(PsiEspaciador[e.target.value][userChangeableData.tipo][userChangeableData.tipo]),
-                    //   });
-
-                    // }
                
                       }}
                     >
@@ -493,11 +540,11 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
                 {(userChangeableData.acristalamiento === "doble" ||
                   userChangeableData.acristalamiento === "triple") && (
                   <div className="col-3">
-                    <legend>Barrotillos del vidrio doble o triple</legend>
+                    <legend>Barrotillos del vidrio</legend>
                     {userChangeableData.acristalamiento === "doble" && (
                       <>
                       
-                      <label htmlFor="incluye">¿incluye?</label>
+                      <label htmlFor="incluye" className="form-label">¿incluye?</label>
                       <select
                         className="form-select mb-3"
                         aria-label="Espaciador de vidrio"
@@ -509,7 +556,6 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
                         }
                         value={userChangeableData.incluyeBarrotillos}
                       >
-                        <option selected>¿Incluye?</option>
                         <option value="si">Si</option>
                         <option selected value="no">No</option>
                       </select>
@@ -519,7 +565,7 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
                     {userChangeableData.acristalamiento === "triple" && (
                       <>
                       
-                      <label htmlFor="incluye">¿incluye?</label>
+                      <label htmlFor="incluye" className="form-label">¿incluye?</label>
                       <select
                         className="form-select mb-3"
                         aria-label="Espaciador de vidrio"
@@ -579,6 +625,7 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
                             Ud Horizontales por vidrio
                           </label>
                         </div>
+                        <label htmlFor="incluye" className="form-label">Material</label>
                         <select
                           className="form-select mb-3"
                           aria-label="Espaciador de vidrio"
@@ -590,10 +637,11 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
                           }
                           value={userChangeableData.material}
                         >
-                          <option selected>Material</option>
-                          <option value="aluminio">Aluminio</option>
+                          {/* <option selected>Material</option> */}
+                          <option selected value="aluminio">Aluminio</option>
                           <option value="plastico">Plástico</option>
                         </select>
+                        <label htmlFor="incluye" className="form-label">Dgb</label>
                         <select
                           className="form-select mb-3"
                           aria-label="Espaciador de vidrio"
@@ -604,25 +652,18 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
                               setUserChangeableData({
                                 ...userChangeableData,
                                 dgb: e.target.value,
-                                // gb: PsiVidirio[userChangeableData.material][
-                                //   userChangeableData.acristalamiento
-                                // ][e.target.value][userChangeableData.tipo],
                               });
                             }
                             if(userChangeableData.acristalamiento === "triple"){
-                              console.log( PsiVidirio[userChangeableData.material])
                               setUserChangeableData({
                                 ...userChangeableData,
                                 dgb: e.target.value,
-                                // gb: PsiVidirio[userChangeableData.material][
-                                //   userChangeableData.acristalamiento
-                                // ][userChangeableData.incluyeBarrotillos][e.target.value][userChangeableData.tipo]
                               });
                             }
                           }}
                         >
-                          <option selected>dgb</option>
-                          <option value="dgb4">&#8805; 4mm</option>
+                          {/* <option selected>dgb</option> */}
+                          <option selected value="dgb4">&#8805; 4mm</option>
                           <option value="dgb2">&#8805; 2mm</option>
                         </select>
                         <div className="mb-3 form-floating">
@@ -631,12 +672,6 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
                             className="form-control"
                             id="gb"
                             placeholder="10"
-                            // onChange={(e) => {
-                            //   setUserChangeableData({
-                            //     ...userChangeableData,
-                            //     gb: e.target.value as unknown as number,
-                            //   });
-                            // }}
                             value={userChangeableData.gb}
                           />
                           <label htmlFor="gb" className="form-label">
@@ -647,10 +682,11 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
                     )}
                   </div>
                 )}
-
-                {/* <div>{JSON.stringify(userChangeableData)}</div>
-                <div>{JSON.stringify(importSelectedData)}</div>
-                <div>{JSON.stringify(internValues)}</div> */}
+                
+                <div className="col-9 mt-5">
+                  <h1 className="m-4"><span onClick={()=>setCalcVisible(!calcVisible)} className="alert alert-primary">Uw: {uW ? uW : "calculando.."}</span></h1>
+                  <button onClick={()=>toPDF()} className="btn btn-primary">Download PDF</button>
+                </div>
               </div>
 
               {/* ))} */}
@@ -659,21 +695,22 @@ console.log(userChangeableData.material, userChangeableData.acristalamiento, use
 
               {calcVisible && <>
                 <div>ancho: {userChangeableData.ancho} | alto: {userChangeableData.alto}</div>
-                <div>acristalamiento: {userChangeableData.acristalamiento} | tipo: {userChangeableData.tipo} | ug: {importSelectedData.ug}</div>
+                <div>acristalamiento: {userChangeableData.acristalamiento} | tipo: {userChangeableData.tipo} | ug: {importSelectedData.ug}</div>
                 <div>tipo:{userChangeableData.material} | wg: {userChangeableData.wg} | </div>
-                <div>Incluye: {userChangeableData.incluyeBarrotillos} | udVertivales: {userChangeableData.verticalesVidrio} | udHorizaontales: {userChangeableData.horizontalesVidrio}| material: {userChangeableData.material} | dgb: {userChangeableData.dgb} | Wgb: {userChangeableData.gb}</div>
-                <div>bf: {importSelectedData.bf} | uf: {importSelectedData.uf} |longitud Per: {internValues.longitudPerimetral} | area: {internValues.areaPerimetral}</div>
-                <div>area vidrio: {internValues.areaVidrio} | ug: {importSelectedData.ug} | alto: {internValues.altoVidrio} | ancho: {internValues.anchoVidrio} </div>
-                <div>af*uf: {internValues.areaPerimetral*importSelectedData.uf} | Psi: {userChangeableData.wg} | Psi*l {internValues.longitudPerimetral*userChangeableData.wg}</div>
-                <div>AgUg: {internValues.areaVidrio*importSelectedData.ug} | Psigb: {userChangeableData.gb} | lgb: {(internValues.altoVidrio * userChangeableData.verticalesVidrio)+internValues.anchoVidrio * userChangeableData.horizontalesVidrio} | lgb*Psigb: {((internValues.altoVidrio * userChangeableData.verticalesVidrio)+(internValues.anchoVidrio * userChangeableData.horizontalesVidrio))*userChangeableData.gb}</div>
+                <div>Incluye: {userChangeableData.incluyeBarrotillos} | udVertivales: {userChangeableData.verticalesVidrio} | udHorizaontales: {userChangeableData.horizontalesVidrio}| material: {userChangeableData.material} | dgb: {userChangeableData.dgb} | Wgb: {userChangeableData.gb}</div>
+                <div>bf: {importSelectedData.bf} | uf: {importSelectedData.uf} |longitud Per: {internValues.longitudPerimetral} | area: {internValues.areaPerimetral}</div>
+                <div>area vidrio: {internValues.areaVidrio} | ug: {importSelectedData.ug} | alto: {internValues.altoVidrio} | ancho: {internValues.anchoVidrio} </div>
+                <div>af*uf: {internValues.areaPerimetral*importSelectedData.uf} | Psi: {userChangeableData.wg} | Psi*l {internValues.longitudPerimetral*userChangeableData.wg}</div>
+                <div>AgUg: {internValues.areaVidrio*importSelectedData.ug} | Psigb: {userChangeableData.gb} | lgb: {(internValues.altoVidrio * userChangeableData.verticalesVidrio)+internValues.anchoVidrio * userChangeableData.horizontalesVidrio} | lgb*Psigb: {((internValues.altoVidrio * userChangeableData.verticalesVidrio)+(internValues.anchoVidrio * userChangeableData.horizontalesVidrio))*userChangeableData.gb}</div>
 
                 
                 <h2>arriba: {(internValues.areaVidrio*importSelectedData.ug)+ (internValues.areaPerimetral*importSelectedData.uf)+(internValues.longitudPerimetral*userChangeableData.wg)+((internValues.altoVidrio * userChangeableData.verticalesVidrio)+(internValues.anchoVidrio * userChangeableData.horizontalesVidrio))*userChangeableData.gb}</h2>
                 <h2>abajo: {(internValues.areaPerimetral + internValues.areaVidrio )}</h2>
                 <h1>Uw: {((internValues.areaVidrio*importSelectedData.ug)+ (internValues.areaPerimetral*importSelectedData.uf)+(internValues.longitudPerimetral*userChangeableData.wg)+((internValues.altoVidrio * userChangeableData.verticalesVidrio)+(internValues.anchoVidrio * userChangeableData.horizontalesVidrio))*userChangeableData.gb)/(internValues.areaPerimetral + internValues.areaVidrio )}</h1>
-              </>}
+              
               {/* <div onClick={()=>setCalcVisible(!calcVisible)}>Uw: {uW}</div> */}
               <h1> <span onClick={()=>setCalcVisible(!calcVisible)} className="badge bg-secondary">Uw: {uW}</span></h1>
+              </>}
             </div>
           </div>
         )}
