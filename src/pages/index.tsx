@@ -1,13 +1,13 @@
 import Head from "next/head";
 import Container from "react-bootstrap/Container";
 import Header from "@/components/Header";
-import { PsiEspaciador, PsiVidirio, data, user } from "@/rawData/testData";
+import { PsiEspaciador, PsiEspaciadorDB, PsiVidirio, data, user } from "@/rawData/testData";
 import { useEffect, useState } from "react";
 import { Margin, usePDF } from "react-to-pdf";
 
 interface UserChangeableData {
-  alto: number,
-  ancho: number,
+  alto: any,
+  ancho: any,
   acristalamiento: string,
   tipo: string,
   wg: number,
@@ -17,7 +17,8 @@ interface UserChangeableData {
   gb: number,
   verticalesVidrio: number,
   horizontalesVidrio: number,
-  materialVidrio: string
+  materialVidrio: string,
+  ug: number
 }
 
 export default function Home() {
@@ -32,13 +33,13 @@ export default function Home() {
   const [firstSelected, setFirstSelected] = useState(-1);
   const [secondSelected, setSecondSelected] = useState(-1);
   const [importSelectedData, setImportSelectedData] = useState({
-    ug: 0,
+    // ug: 0,
     uf: 0,
     bf: 0,
   });
   const [userChangeableData, setUserChangeableData] = useState({
-    alto: 1,
-    ancho: 1,
+    alto: 0,
+    ancho: 0,
     acristalamiento: "simple",
     tipo: "sinRevestir",
     wg: 0,
@@ -48,7 +49,8 @@ export default function Home() {
     gb: 0,
     verticalesVidrio: 0,
     horizontalesVidrio: 0,
-    materialVidrio: "aluminio"
+    materialVidrio: "aluminio",
+    ug: 0
   });
 
   const [internValues, setInternValues] = useState({
@@ -67,15 +69,14 @@ export default function Home() {
 
   const [uW, setUw] = useState(0);
 
-  useEffect(() => {
+
+
+  const updateAnchoAlto = () => {
     const bf2 = 2 * importSelectedData.bf;
-    const longitudPerimetral =
-      (userChangeableData.alto - bf2 + (userChangeableData.ancho - bf2)) * 2;
-    const areaPerimetral =
-      (userChangeableData.ancho * 1 - bf2 + userChangeableData.alto * 1) * bf2;
+    const longitudPerimetral = (userChangeableData.alto - bf2 + (userChangeableData.ancho - bf2)) * 2;
+    const areaPerimetral = (userChangeableData.ancho * 1 - bf2 + userChangeableData.alto * 1) * bf2;
     const altoVidrio = userChangeableData.alto * 1 - 2 * importSelectedData.bf;
-    const anchoVidrio =
-      userChangeableData.ancho * 1 - 2 * importSelectedData.bf;
+    const anchoVidrio = userChangeableData.ancho * 1 - 2 * importSelectedData.bf;
     const areaVidrio = altoVidrio * anchoVidrio;
 
     const lgb =
@@ -86,7 +87,9 @@ export default function Home() {
 
     const afUf = areaPerimetral * importSelectedData.uf;
     const psiL = userChangeableData.wg * longitudPerimetral;
-    const agUg = areaVidrio * importSelectedData.ug;
+
+    // este ug tiene que ser manual
+    const agUg = areaVidrio * userChangeableData.ug;
     const lgbWg = lgb * userChangeableData.gb;
     setInternValues({
       ...internValues,
@@ -94,7 +97,6 @@ export default function Home() {
       areaPerimetral,
       areaVidrio,
       lgb,
-      // uW,
       afUf,
       psiL,
       agUg,
@@ -102,14 +104,7 @@ export default function Home() {
       altoVidrio,
       anchoVidrio
     });
-  }, [userChangeableData]);
-
-  useEffect(() => {
-    const uWS = internValues.agUg + internValues.afUf + internValues.psiL + internValues.lgbWg;
-    const uWI = internValues.areaVidrio + internValues.areaPerimetral
-    const uW = uWS / uWI;
-    setUw(uW)
-  }, [internValues])
+  }
 
   const getPsiVidiro = (userChangeableData: UserChangeableData) => {
 
@@ -124,9 +119,12 @@ export default function Home() {
       newUserChangeableData = {...newUserChangeableData, gb: 0}
     }
 
+    // PsiEspaciador
     if(userChangeableData.materialVidrio && userChangeableData.tipo && userChangeableData.acristalamiento){
       const wgDependiente = userChangeableData.materialVidrio === 'SP14' || userChangeableData.materialVidrio === 'SP16' ? userChangeableData.acristalamiento : userChangeableData.tipo 
+      console.log(wgDependiente, PsiEspaciador[userChangeableData.materialVidrio][wgDependiente], 'userChangeableData.materialVidrio:',userChangeableData.materialVidrio, 'acristalamiento:',userChangeableData.acristalamiento, 'tipo:',userChangeableData.tipo)
       newUserChangeableData = {...newUserChangeableData,  wg: Number(PsiEspaciador[userChangeableData.materialVidrio][wgDependiente])}
+      console.log({arrayFilter: PsiEspaciadorDB.filter((item: any) => item.type === userChangeableData.materialVidrio && item.glassMaterial === wgDependiente )})
     }else{
       newUserChangeableData = {...newUserChangeableData,  wg: 0, incluyeBarrotillos: 'no'}
     }
@@ -134,27 +132,67 @@ export default function Home() {
     setUserChangeableData(newUserChangeableData);
   }
 
+  const getUw = () => {
+    const uWS = internValues.agUg + internValues.afUf + internValues.psiL + internValues.lgbWg;
+    const uWI = internValues.areaVidrio + internValues.areaPerimetral
+    const uW = uWS / uWI;
+    setUw(uW)
+  }
 
   useEffect(()=> {
       getPsiVidiro(userChangeableData)
   }, [userChangeableData.material])
+
   useEffect(()=> {
     getPsiVidiro(userChangeableData)
   }, [userChangeableData.acristalamiento])
+
   useEffect(()=> {
     getPsiVidiro(userChangeableData)
   }, [userChangeableData.dgb])
+
   useEffect(()=> {
     getPsiVidiro(userChangeableData)
   }, [userChangeableData.tipo])
+
+  useEffect(()=> {
+    getPsiVidiro(userChangeableData)
+  }, [userChangeableData.materialVidrio])
+
+  useEffect(()=>{
+    updateAnchoAlto()
+  }, [userChangeableData.ancho])
+
+  useEffect(()=>{
+    updateAnchoAlto()
+  }, [userChangeableData.alto])
+
+  useEffect(()=>{
+    updateAnchoAlto()
+  }, [userChangeableData.ug])
+
+  useEffect(()=>{
+    getPsiVidiro(userChangeableData)
+    updateAnchoAlto()
+    getUw()
+  }, [])
+
+  useEffect(() => {
+    // console.log('entro intervalues', internValues.agUg, internValues.afUf, internValues.psiL, internValues.lgbWg, internValues.areaVidrio, internValues.areaPerimetral)
+    // const uWS = internValues.agUg + internValues.afUf + internValues.psiL + internValues.lgbWg;
+    // const uWI = internValues.areaVidrio + internValues.areaPerimetral
+    // const uW = uWS / uWI;
+    // setUw(uW)
+    getUw()
+  }, [internValues, progress, userChangeableData])
 
 
   const secondSelection = (index: number) => {
     setSecondSelected(index);
     const selectedData = data[firstSelected].blueprints[index];
     if (selectedData) {
-      const { bf, uf, ug } = selectedData;
-      setImportSelectedData({ bf, uf, ug });
+      const { bf, uf } = selectedData;
+      setImportSelectedData({ bf, uf});
     }
     setProgress(3);
   };
@@ -445,7 +483,16 @@ export default function Home() {
                       className="form-control"
                       id="ug"
                       placeholder="10"
-                      value={importSelectedData.ug}
+                      onChange={(e) =>
+                        setUserChangeableData({
+                          ...userChangeableData,
+                          ug: e.target.value as unknown as number,
+                        })
+                      }
+                      value={
+                        userChangeableData.ug
+                      }
+                      // value={importSelectedData.ug}
                     />
                     <label htmlFor="ug" className="form-label">
                       Ug(W/m2K)
@@ -684,7 +731,7 @@ export default function Home() {
                 )}
                 
                 <div className="col-9 mt-5">
-                  <h1 className="m-4"><span onClick={()=>setCalcVisible(!calcVisible)} className="alert alert-primary">Uw: {uW ? uW : "calculando.."}</span></h1>
+                  <h1 className="m-4"><span onClick={()=>setCalcVisible(!calcVisible)} className="alert alert-primary">Uw: {!(isNaN(uW) || uW === Infinity || uW === -Infinity) ? uW : "calculando.."}</span></h1>
                   <button onClick={()=>toPDF()} className="btn btn-primary">Download PDF</button>
                 </div>
               </div>
@@ -695,18 +742,18 @@ export default function Home() {
 
               {calcVisible && <>
                 <div>ancho: {userChangeableData.ancho} | alto: {userChangeableData.alto}</div>
-                <div>acristalamiento: {userChangeableData.acristalamiento} | tipo: {userChangeableData.tipo} | ug: {importSelectedData.ug}</div>
+                <div>acristalamiento: {userChangeableData.acristalamiento} | tipo: {userChangeableData.tipo} | ug: {userChangeableData.ug}</div>
                 <div>tipo:{userChangeableData.material} | wg: {userChangeableData.wg} | </div>
                 <div>Incluye: {userChangeableData.incluyeBarrotillos} | udVertivales: {userChangeableData.verticalesVidrio} | udHorizaontales: {userChangeableData.horizontalesVidrio}| material: {userChangeableData.material} | dgb: {userChangeableData.dgb} | Wgb: {userChangeableData.gb}</div>
                 <div>bf: {importSelectedData.bf} | uf: {importSelectedData.uf} |longitud Per: {internValues.longitudPerimetral} | area: {internValues.areaPerimetral}</div>
-                <div>area vidrio: {internValues.areaVidrio} | ug: {importSelectedData.ug} | alto: {internValues.altoVidrio} | ancho: {internValues.anchoVidrio} </div>
+                <div>area vidrio: {internValues.areaVidrio} | ug: {userChangeableData.ug} | alto: {internValues.altoVidrio} | ancho: {internValues.anchoVidrio} </div>
                 <div>af*uf: {internValues.areaPerimetral*importSelectedData.uf} | Psi: {userChangeableData.wg} | Psi*l {internValues.longitudPerimetral*userChangeableData.wg}</div>
-                <div>AgUg: {internValues.areaVidrio*importSelectedData.ug} | Psigb: {userChangeableData.gb} | lgb: {(internValues.altoVidrio * userChangeableData.verticalesVidrio)+internValues.anchoVidrio * userChangeableData.horizontalesVidrio} | lgb*Psigb: {((internValues.altoVidrio * userChangeableData.verticalesVidrio)+(internValues.anchoVidrio * userChangeableData.horizontalesVidrio))*userChangeableData.gb}</div>
+                <div>AgUg: {internValues.areaVidrio*userChangeableData.ug} | Psigb: {userChangeableData.gb} | lgb: {(internValues.altoVidrio * userChangeableData.verticalesVidrio)+internValues.anchoVidrio * userChangeableData.horizontalesVidrio} | lgb*Psigb: {((internValues.altoVidrio * userChangeableData.verticalesVidrio)+(internValues.anchoVidrio * userChangeableData.horizontalesVidrio))*userChangeableData.gb}</div>
 
                 
-                <h2>arriba: {(internValues.areaVidrio*importSelectedData.ug)+ (internValues.areaPerimetral*importSelectedData.uf)+(internValues.longitudPerimetral*userChangeableData.wg)+((internValues.altoVidrio * userChangeableData.verticalesVidrio)+(internValues.anchoVidrio * userChangeableData.horizontalesVidrio))*userChangeableData.gb}</h2>
+                <h2>arriba: {(internValues.areaVidrio*userChangeableData.ug)+ (internValues.areaPerimetral*importSelectedData.uf)+(internValues.longitudPerimetral*userChangeableData.wg)+((internValues.altoVidrio * userChangeableData.verticalesVidrio)+(internValues.anchoVidrio * userChangeableData.horizontalesVidrio))*userChangeableData.gb}</h2>
                 <h2>abajo: {(internValues.areaPerimetral + internValues.areaVidrio )}</h2>
-                <h1>Uw: {((internValues.areaVidrio*importSelectedData.ug)+ (internValues.areaPerimetral*importSelectedData.uf)+(internValues.longitudPerimetral*userChangeableData.wg)+((internValues.altoVidrio * userChangeableData.verticalesVidrio)+(internValues.anchoVidrio * userChangeableData.horizontalesVidrio))*userChangeableData.gb)/(internValues.areaPerimetral + internValues.areaVidrio )}</h1>
+                <h1>Uw: {((internValues.areaVidrio*userChangeableData.ug)+ (internValues.areaPerimetral*importSelectedData.uf)+(internValues.longitudPerimetral*userChangeableData.wg)+((internValues.altoVidrio * userChangeableData.verticalesVidrio)+(internValues.anchoVidrio * userChangeableData.horizontalesVidrio))*userChangeableData.gb)/(internValues.areaPerimetral + internValues.areaVidrio )}</h1>
               
               {/* <div onClick={()=>setCalcVisible(!calcVisible)}>Uw: {uW}</div> */}
               <h1> <span onClick={()=>setCalcVisible(!calcVisible)} className="badge bg-secondary">Uw: {uW}</span></h1>
