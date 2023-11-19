@@ -25,11 +25,11 @@ export const data = [
 ];
 
 export const PsiEspaciador: any = {
-  aluminio: { simple: 0, sinRevestir: 0.08, bajoEmisivo: 0.11 },
+  aluminio: { simple: 0, 'sin revestir': 0.08, 'bajo emisivo': 0.11 },
   prestacionesTermicasMejoradas: {
     simple: 0,
-    sinRevestir: 0.06,
-    bajoEmisivo: 0.08,
+    'sin revestir': 0.06,
+    'bajo emisivo': 0.08,
   },
   SP14: { simple: 0, doble: 0.049, triple: 0.044 },
   SP16: { simple: 0, doble: 0.036, triple: 0.031 },
@@ -40,34 +40,34 @@ export const PsiVidirio: any = {
     doble: {
       no: 0,
       dgb2: {
-        sinRevestir: 0.03,
-        bajoEmisivo: 0.07,
+        'sin revestir': 0.03,
+        'bajo emisivo': 0.07,
       },
       dgb4: {
-        sinRevestir: 0.01,
-        bajoEmisivo: 0.04,
+        'sin revestir': 0.01,
+        'bajo emisivo': 0.04,
       },
     },
     triple : {
         no: 0,
         vidrio1:{
             dgb2: {
-                sinRevestir: 0,
-                bajoEmisivo: 0.03,
+                'sin revestir': 0,
+                'bajo emisivo': 0.03,
             },
             dgb4: {
-                sinRevestir: 0,
-                bajoEmisivo: 0.01,
+                'sin revestir': 0,
+                'bajo emisivo': 0.01,
             },
         },
         vidrio2:{
             dgb2: {
-                sinRevestir: 0,
-                bajoEmisivo: 0.05,
+                'sin revestir': 0,
+                'bajo emisivo': 0.05,
             },
             dgb4: {
-                sinRevestir: 0,
-                bajoEmisivo: 0.02,
+                'sin revestir': 0,
+                'bajo emisivo': 0.02,
             },
         }
     }
@@ -76,34 +76,34 @@ export const PsiVidirio: any = {
     doble: {
       no: 0,
       dgb2: {
-        sinRevestir: 0,
-        bajoEmisivo: 0.04,
+        'sin revestir': 0,
+        'bajo emisivo': 0.04,
       },
       dgb4: {
-        sinRevestir: 0,
-        bajoEmisivo: 0.02,
+        'sin revestir': 0,
+        'bajo emisivo': 0.02,
       },
     },
     triple : {
         no: 0,
         vidrio1:{
             dgb2: {
-                sinRevestir: 0,
-                bajoEmisivo: 0.02,
+                'sin revestir': 0,
+                'bajo emisivo': 0.02,
             },
             dgb4: {
-                sinRevestir: 0,
-                bajoEmisivo: 0.01,
+                'sin revestir': 0,
+                'bajo emisivo': 0.01,
             },
         },
         vidrio2:{
             dgb2: {
-                sinRevestir: 0,
-                bajoEmisivo: 0.03,
+                'sin revestir': 0,
+                'bajo emisivo': 0.03,
             },
             dgb4: {
-                sinRevestir: 0,
-                bajoEmisivo: 0.02,
+                'sin revestir': 0,
+                'bajo emisivo': 0.02,
             },
         }
     }
@@ -112,7 +112,7 @@ export const PsiVidirio: any = {
 
 // export enum GlassMaterial {
 //   simple = 'simple',
-//   sinRevestir = 'sin revestir'
+//   'sin revestir' = 'sin revestir'
 
 // }
 
@@ -182,6 +182,10 @@ export const PsiEspaciadorDB: any = [
 
 const PsiVidirioDB: any = [
   {
+    number: 'no',
+    gb: 0
+  },
+  {
     number: 'si',
     type: 'aluminio',
     glassDensity: 'doble',
@@ -247,137 +251,137 @@ const PsiVidirioDB: any = [
     gb: 0.01
   },
     // ------
-    {
-      number: 'si, en 2 vidrio',
-      type: 'aluminio',
-      glassDensity: 'triple',
-      dgb: 2,
-      glassMaterial: 'sin revestir',
-      gb: 0
-    },
-    {
-      number: 'si, en 2 vidrio',
-      type: 'aluminio',
-      glassDensity: 'triple',
-      dgb: 2,
-      glassMaterial: 'bajo emisivo',
-      gb: 0.05
-    },
-    {
-      number: 'si, en 2 vidrio',
-      type: 'aluminio',
-      glassDensity: 'triple',
-      dgb: 4,
-      glassMaterial: 'sin revestir',
-      gb: 0
-    },
-    {
-      number: 'si, en 2 vidrio',
-      type: 'aluminio',
-      glassDensity: 'triple',
-      dgb: 4,
-      glassMaterial: 'bajo emisivo',
-      gb: 0.02
-    },
+  {
+    number: 'si, en 2 vidrio',
+    type: 'aluminio',
+    glassDensity: 'triple',
+    dgb: 2,
+    glassMaterial: 'sin revestir',
+    gb: 0
+  },
+  {
+    number: 'si, en 2 vidrio',
+    type: 'aluminio',
+    glassDensity: 'triple',
+    dgb: 2,
+    glassMaterial: 'bajo emisivo',
+    gb: 0.05
+  },
+  {
+    number: 'si, en 2 vidrio',
+    type: 'aluminio',
+    glassDensity: 'triple',
+    dgb: 4,
+    glassMaterial: 'sin revestir',
+    gb: 0
+  },
+  {
+    number: 'si, en 2 vidrio',
+    type: 'aluminio',
+    glassDensity: 'triple',
+    dgb: 4,
+    glassMaterial: 'bajo emisivo',
+    gb: 0.02
+  },
 /// plastico
-    {
-      number: 'si',
-      type: 'plastico',
-      glassDensity: 'doble',
-      dgb: 2,
-      glassMaterial: 'sin revestir',
-      gb: 0
-    },
-    {
-      number: 'si',
-      type: 'plastico',
-      glassDensity: 'doble',
-      dgb: 2,
-      glassMaterial: 'bajo emisivo',
-      gb: 0.04
-    },
-    {
-      number: 'si',
-      type: 'plastico',
-      glassDensity: 'doble',
-      dgb: 4,
-      glassMaterial: 'sin revestir',
-      gb: 0
-    },
-    {
-      number: 'si',
-      type: 'plastico',
-      glassDensity: 'doble',
-      dgb: 4,
-      glassMaterial: 'bajo emisivo',
-      gb: 0.02
-    },
-    // ------
-    {
-      number: 'si, en 1 vidrio',
-      type: 'plastico',
-      glassDensity: 'triple',
-      dgb: 2,
-      glassMaterial: 'sin revestir',
-      gb: 0
-    },
-    {
-      number: 'si, en 1 vidrio',
-      type: 'plastico',
-      glassDensity: 'triple',
-      dgb: 2,
-      glassMaterial: 'bajo emisivo',
-      gb: 0.02
-    },
-    {
-      number: 'si, en 1 vidrio',
-      type: 'plastico',
-      glassDensity: 'triple',
-      dgb: 4,
-      glassMaterial: 'sin revestir',
-      gb: 0
-    },
-    {
-      number: 'si, en 1 vidrio',
-      type: 'plastico',
-      glassDensity: 'triple',
-      dgb: 4,
-      glassMaterial: 'bajo emisivo',
-      gb: 0.01
-    },
-    // ------
-    {
-      number: 'si, en 2 vidrio',
-      type: 'plastico',
-      glassDensity: 'triple',
-      dgb: 2,
-      glassMaterial: 'sin revestir',
-      gb: 0
-    },
-    {
-      number: 'si, en 2 vidrio',
-      type: 'plastico',
-      glassDensity: 'triple',
-      dgb: 2,
-      glassMaterial: 'bajo emisivo',
-      gb: 0.0
-    },
-    {
-      number: 'si, en 2 vidrio',
-      type: 'plastico',
-      glassDensity: 'triple',
-      dgb: 4,
-      glassMaterial: 'sin revestir',
-      gb: 0
-    },
-    {
-      number: 'si, en 2 vidrio',
-      type: 'plastico',
-      glassDensity: 'triple',
-      dgb: 4,
-      glassMaterial: 'bajo emisivo',
-      gb: 0.02
-    },
+  {
+    number: 'si',
+    type: 'plastico',
+    glassDensity: 'doble',
+    dgb: 2,
+    glassMaterial: 'sin revestir',
+    gb: 0
+  },
+  {
+    number: 'si',
+    type: 'plastico',
+    glassDensity: 'doble',
+    dgb: 2,
+    glassMaterial: 'bajo emisivo',
+    gb: 0.04
+  },
+  {
+    number: 'si',
+    type: 'plastico',
+    glassDensity: 'doble',
+    dgb: 4,
+    glassMaterial: 'sin revestir',
+    gb: 0
+  },
+  {
+    number: 'si',
+    type: 'plastico',
+    glassDensity: 'doble',
+    dgb: 4,
+    glassMaterial: 'bajo emisivo',
+    gb: 0.02
+  },
+  // ------
+  {
+    number: 'si, en 1 vidrio',
+    type: 'plastico',
+    glassDensity: 'triple',
+    dgb: 2,
+    glassMaterial: 'sin revestir',
+    gb: 0
+  },
+  {
+    number: 'si, en 1 vidrio',
+    type: 'plastico',
+    glassDensity: 'triple',
+    dgb: 2,
+    glassMaterial: 'bajo emisivo',
+    gb: 0.02
+  },
+  {
+    number: 'si, en 1 vidrio',
+    type: 'plastico',
+    glassDensity: 'triple',
+    dgb: 4,
+    glassMaterial: 'sin revestir',
+    gb: 0
+  },
+  {
+    number: 'si, en 1 vidrio',
+    type: 'plastico',
+    glassDensity: 'triple',
+    dgb: 4,
+    glassMaterial: 'bajo emisivo',
+    gb: 0.01
+  },
+  // ------
+  {
+    number: 'si, en 2 vidrio',
+    type: 'plastico',
+    glassDensity: 'triple',
+    dgb: 2,
+    glassMaterial: 'sin revestir',
+    gb: 0
+  },
+  {
+    number: 'si, en 2 vidrio',
+    type: 'plastico',
+    glassDensity: 'triple',
+    dgb: 2,
+    glassMaterial: 'bajo emisivo',
+    gb: 0.0
+  },
+  {
+    number: 'si, en 2 vidrio',
+    type: 'plastico',
+    glassDensity: 'triple',
+    dgb: 4,
+    glassMaterial: 'sin revestir',
+    gb: 0
+  },
+  {
+    number: 'si, en 2 vidrio',
+    type: 'plastico',
+    glassDensity: 'triple',
+    dgb: 4,
+    glassMaterial: 'bajo emisivo',
+    gb: 0.02
+  },
 ]
 
 // {
