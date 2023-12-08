@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 
 
-const Header: React.FC = () => {
+const MainHeader: React.FC = () => {
   const { data, status}: any = useSession();
 
   function logoutHandler(){
@@ -44,4 +44,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header;
+export default MainHeader;
